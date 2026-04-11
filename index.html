@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>睡眠タイプ動物診断 — あなたの眠りを動物に例えると？</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap');
+
+  :root {
+    --bg-dark: #0a0e27;
+    --bg-card: #151937;
+    --accent: #7c6ef0;
+    --accent-light: #a594ff;
+    --gold: #ffd475;
+    --text: #e8e6f0;
+    --text-dim: #9994b8;
+    --moon: #fffbe6;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    background: var(--bg-dark);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* === 星空背景 === */
+  .stars {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 0;
+  }
+  .star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle var(--dur) ease-in-out infinite alternate;
+  }
+  @keyframes twinkle {
+    0% { opacity: 0.2; transform: scale(0.8); }
+    100% { opacity: 1; transform: scale(1.2); }
+  }
+
+  /* === 月 === */
+  .moon-bg {
+    position: fixed;
+    top: 40px; right: 60px;
+    width: 80px; height: 80px;
+    background: var(--moon);
+    border-radius: 50%;
+    box-shadow: 0 0 40px rgba(255, 251, 230, 0.4), 0 0 80px rgba(255, 251, 230, 0.15);
+    z-index: 0;
+    opacity: 0.7;
+  }
+
+  /* === メインコンテナ === */
+  .container {
+    position: relative; z-index: 1;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* === 画面（共通） === */
+  .screen {
+    display: none;
+    width: 100%;
+    animation: fadeUp 0.6s ease-out;
+  }
+  .screen.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* === スタート画面 === */
+  .start-screen {
+    text-align: center;
+  }
+  .start-screen h1 {
+    font-size: 1.8rem;
+    font-weight: 900;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, var(--accent-light), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .start-screen .subtitle {
+    font-size: 1rem;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+  }
+  .start-animal-ring {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    font-size: 2.2rem;
+    margin: 24px 0;
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  .start-desc {
+    color: var(--text-dim);
+    font-size: 0.88rem;
+    line-height: 1.7;
+    margin-bottom: 32px;
+  }
+
+  /* === ボタン === */
+  .btn {
+    display: inline-block;
+    padding: 14px 48px;
+    border: none;
+    border-radius: 50px;
+    font-family: inherit;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: linear-gradient(135deg, var(--accent), #5b4ed4);
+    color: white;
+    box-shadow: 0 4px 24px rgba(124, 110, 240, 0.35);
+  }
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 32px rgba(124, 110, 240, 0.5);
+  }
+  .btn:active { transform: translateY(0); }
+
+  .btn-outline {
+    background: transparent;
+    border: 2px solid var(--accent);
+    color: var(--accent-light);
+    box-shadow: none;
+  }
+  .btn-outline:hover {
+    background: rgba(124, 110, 240, 0.1);
+    box-shadow: none;
+  }
+
+  /* === 質問画面 === */
+  .question-screen { text-align: center; }
+
+  .progress-bar {
+    width: 100%;
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    margin-bottom: 32px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--gold));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .q-number {
+    font-size: 0.8rem;
+    color: var(--accent-light);
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+  }
+  .q-text {
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1.6;
+    margin-bottom: 28px;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .option-btn {
+    width: 100%;
+    padding: 16px 20px;
+    background: var(--bg-card);
+    border: 2px solid rgba(124, 110, 240, 0.2);
+    border-radius: 16px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s;
+    text-align: left;
+    line-height: 1.5;
+  }
+  .option-btn:hover {
+    border-color: var(--accent);
+    background: rgba(124, 110, 240, 0.08);
+    transform: translateX(4px);
+  }
+  .option-btn:active {
+    transform: translateX(2px);
+  }
+  .option-btn .opt-icon {
+    margin-right: 8px;
+  }
+
+  /* === 結果画面 === */
+  .result-screen { text-align: center; }
+
+  .result-label {
+    font-size: 0.85rem;
+    color: var(--gold);
+    letter-spacing: 3px;
+    margin-bottom: 8px;
+  }
+  .result-animal-name {
+    font-size: 2rem;
+    font-weight: 900;
+    margin-bottom: 4px;
+    background: linear-gradient(135deg, var(--accent-light), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .result-type-label {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+  }
+
+  .result-animal-img {
+    width: 180px;
+    height: 180px;
+    margin: 0 auto 24px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(124,110,240,0.15), transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 6rem;
+    border: 3px solid rgba(124, 110, 240, 0.3);
+    box-shadow: 0 0 40px rgba(124, 110, 240, 0.15);
+    overflow: hidden;
+  }
+  .result-animal-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .result-card {
+    background: var(--bg-card);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 20px;
+    text-align: left;
+    border: 1px solid rgba(124, 110, 240, 0.15);
+  }
+  .result-card h3 {
+    font-size: 0.85rem;
+    color: var(--accent-light);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .result-card p {
+    font-size: 0.92rem;
+    line-height: 1.8;
+    color: var(--text);
+  }
+  .result-card .source {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-top: 8px;
+    font-style: italic;
+  }
+
+  .advice-box {
+    background: linear-gradient(135deg, rgba(124,110,240,0.12), rgba(255,212,117,0.08));
+    border: 1px solid rgba(255, 212, 117, 0.25);
+  }
+  .advice-box h3 { color: var(--gold); }
+
+  .share-section {
+    margin-top: 28px;
+    margin-bottom: 16px;
+  }
+  .share-section p {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+  }
+  .share-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .share-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 50px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    color: white;
+  }
+  .share-x { background: #1d9bf0; }
+  .share-line { background: #06c755; }
+  .share-copy { background: #666; }
+  .share-btn:hover { transform: translateY(-2px); opacity: 0.9; }
+
+  .retry-section { margin-top: 20px; }
+
+  /* === クレジット === */
+  .credit {
+    text-align: center;
+    margin-top: 32px;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    opacity: 0.6;
+  }
+  .credit a { color: var(--accent-light); text-decoration: none; }
+
+  /* === レスポンシブ === */
+  @media (max-width: 480px) {
+    .container { padding: 16px; }
+    .start-screen h1 { font-size: 1.5rem; }
+    .result-animal-name { font-size: 1.6rem; }
+    .result-animal-img { width: 140px; height: 140px; font-size: 4.5rem; }
+    .moon-bg { width: 50px; height: 50px; top: 20px; right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 星空背景 -->
+<div class="stars" id="stars"></div>
+<div class="moon-bg"></div>
+
+<div class="container">
+
+  <!-- ===== スタート画面 ===== -->
+  <div class="screen active" id="screen-start">
+    <div class="start-screen">
+      <h1>睡眠タイプ動物診断</h1>
+      <p class="subtitle">あなたの眠りを動物に例えると…？</p>
+      <div class="start-animal-ring">
+        <span>🐨</span><span>🐬</span><span>🦒</span><span>🐱</span>
+        <span>🐻</span><span>🦥</span><span>🐦</span><span>🦦</span>
+      </div>
+      <p class="start-desc">
+        5つの質問に答えるだけで、<br>
+        あなたの睡眠パターンに最も近い動物がわかります。<br>
+        その動物のリアルな睡眠の生態から、<br>
+        あなたへの改善アドバイスもお届け！
+      </p>
+      <button class="btn" onclick="startQuiz()">診断スタート</button>
+    </div>
+  </div>
+
+  <!-- ===== 質問画面 ===== -->
+  <div class="screen" id="screen-question">
+    <div class="question-screen">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <div class="q-number" id="q-number"></div>
+      <div class="q-text" id="q-text"></div>
+      <div class="options" id="options"></div>
+    </div>
+  </div>
+
+  <!-- ===== 結果画面 ===== -->
+  <div class="screen" id="screen-result">
+    <div class="result-screen">
+      <p class="result-label">YOUR SLEEP TYPE</p>
+      <h2 class="result-animal-name" id="result-name"></h2>
+      <p class="result-type-label" id="result-type"></p>
+      <div class="result-animal-img" id="result-img"></div>
+
+      <div class="result-card" id="card-ecology">
+        <h3>🔬 この動物の睡眠の生態</h3>
+        <p id="result-ecology"></p>
+        <p class="source" id="result-source"></p>
+      </div>
+
+      <div class="result-card" id="card-you">
+        <h3>🪞 あなたの睡眠傾向</h3>
+        <p id="result-tendency"></p>
+      </div>
+
+      <div class="result-card advice-box" id="card-advice">
+        <h3>💡 クラネル先生の改善アドバイス</h3>
+        <p id="result-advice"></p>
+      </div>
+
+      <div class="share-section">
+        <p>結果をシェアしよう</p>
+        <div class="share-buttons">
+          <button class="share-btn share-x" onclick="shareX()">𝕏 でシェア</button>
+          <button class="share-btn share-line" onclick="shareLINE()">LINEで送る</button>
+          <button class="share-btn share-copy" onclick="copyResult()">📋 コピー</button>
+        </div>
+      </div>
+
+      <div class="retry-section">
+        <button class="btn btn-outline" onclick="retry()">もう一度やる</button>
+      </div>
+
+      <div class="result-card" style="background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.08); margin-top: 8px;">
+        <p style="font-size: 0.78rem; color: var(--text-dim); line-height: 1.7;">
+          ※本診断はエン���ーテインメントを目���としたもので、医学的な検査・診断ではありません。掲載情報は一般的な知識の提供を目的としており、���別の医療アドバイスに代わるものではありません。睡眠の困りごとが長期間続く場合は、医療機関への受診をおすすめ��ます。コンテンツの無断転載はご遠慮ください。シェアはリンクでお願いします。
+        </p>
+      </div>
+
+      <p class="credit">
+        監修：<a href="https://note.com/" target="_blank" rel="noopener">クラネル先生 × みんと</a>｜睡眠改善プロジェクト
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ===== 動物データ =====
+const animals = {
+  koala: {
+    name: "コアラ",
+    emoji: "🐨",
+    type: "ロングスリーパータイプ",
+    ecology: "コアラは1日18〜22時間も眠る、動物界トップクラスのロングスリーパーです。主食のユーカリは栄養価が低く毒素も含むため、その消化と解毒に膨大なエネルギーを消費します。だからこそ、エネルギーを節約するために長時間の睡眠が必要なのです。",
+    source: "参考: National Geographic, Australian Koala Foundation",
+    tendency: "あなたは十分な睡眠時間を確保しないと本調子が出ないタイプ。「たくさん寝る」はワガママではなく、あなたの体が求める正当なメンテナンス。その自覚があるからこそ、睡眠を大切にできる素質があります。",
+    advice: "長く寝ること自体は悪くありません。ただし「寝溜め」で平日と休日の睡眠リズムが2時間以上ずれると、社会的時差ボケ（Social Jet Lag）の原因になることがあります。毎日の起床時刻を±30分以内に揃えることで、長い睡眠の質がグッと上がりますよ。"
+  },
+  dolphin: {
+    name: "イルカ",
+    emoji: "🐬",
+    type: "浅い眠り・アラートタイプ",
+    ecology: "イルカは「半球睡眠（Unihemispheric Sleep）」という驚きの能力を持ちます。脳の左右を交互に眠らせ、片目を開けたまま泳ぎ続けることができます。捕食者への警戒を緩めず、呼吸のために水面に上がり続ける必要があるための進化的適応です。",
+    source: "参考: Mukhametov, 1987; Rattenborg et al., 2000 (Neuroscience & Biobehavioral Reviews)",
+    tendency: "あなたは感覚が鋭く、ちょっとした物音や光にも気づけるタイプ。それは「常にアンテナが立っている」という強みでもあります。ただ、寝ても疲れが取れにくいと感じることがあるなら、脳のスイッチの切り方を工夫してみましょう。",
+    advice: "入眠前の「脳のクールダウン」がカギです。心配事やタスクを紙に全部書き出す「ブレインダンプ」で頭を空にしてから布団に入りましょう。また、寝室の温度は18〜22℃程度が目安。涼しめの環境が深部体温を下げやすくし、入眠の質を高めてくれます。"
+  },
+  giraffe: {
+    name: "キリン",
+    emoji: "🦒",
+    type: "ショートスリーパータイプ",
+    ecology: "野生のキリンの睡眠時間は1日わずか30分〜2時間ほどとされています。1回の睡眠はたった数分で、立ったまま浅い眠りを取ります。横になって深く眠る時間はごくわずか。草食動物として捕食リスクが高い環境が、この極端な短時間睡眠を生み出しました。",
+    source: "参考: Tobler & Schwierin, 1996 (Journal of Sleep Research) ※飼育個体では約4.6時間",
+    tendency: "あなたは短い睡眠でもパッと動けてしまう行動力の持ち主。時間を有効に使いたい気持ちが強く、「寝るのがもったいない」と感じることも。ただ、体は正直なので、気づかないうちに睡眠負債がたまっている可能性も。",
+    advice: "生まれつき短時間睡眠で十分な体質（特定の遺伝子変異）はごく稀とされています。多くの場合、「慣れ」で気づいていないだけでパフォーマンスは下がっていることも。試しに1週間だけ7時間睡眠にしてみてください。日中の集中力の変化に驚くかもしれません。"
+  },
+  cat: {
+    name: "ネコ",
+    emoji: "🐱",
+    type: "多相睡眠・昼寝の達人タイプ",
+    ecology: "ネコは1日12〜16時間寝ますが、一度に長く寝るのではなく、短い睡眠を1日に何度も繰り返す「多相睡眠」のスタイルです。これは野生の狩猟本能の名残で、短い覚醒と睡眠を繰り返すことで、いつでもチャンスに反応できるようにしています。",
+    source: "参考: Sterman et al., 1965; Lucas & Sterman (Brain Research)",
+    tendency: "あなたは短時間でサッと回復できる、睡眠効率の高いタイプ。午後のちょっとした仮眠で集中力を取り戻せるのは立派なスキルです。夜まとめて寝るより、上手に分割する方が体に合っているかも。",
+    advice: "「パワーナップ」を戦略的に活用しましょう。ポイントは3つ：①12〜15時の間に②15〜20分だけ③横にならずに。20分を超えると深い睡眠に入り、起きた後のぼんやり感（Sleep Inertia）が強くなります。昼寝の前にコーヒーを飲む「コーヒーナップ」もおすすめです。"
+  },
+  bear: {
+    name: "クマ",
+    emoji: "🐻",
+    type: "メリハリ睡眠・季節型タイプ",
+    ecology: "クマは冬になると最大7ヶ月もの冬眠に入ります。この間、体温は4〜8℃ほど下がり、心拍数は1分間に10回以下に。実は冬眠中も浅い覚醒はあり、完全に意識がなくなるわけではありません。夏場はアクティブに活動し、睡眠は短めになります。",
+    source: "参考: Tøien et al., 2011 (Science); 北海道大学冬眠研究",
+    tendency: "あなたは「やる時はやる、休む時はとことん休む」タイプ。メリハリのある生活リズムは強みですが、調子が良い時期に飛ばしすぎて、一気にガス欠になるパターンに要注意。波を上手に乗りこなすのがカギです。",
+    advice: "メリハリがあること自体はとても自然なことです。ただ「燃え尽き→過眠」の振り幅が大きすぎると体内時計が乱れやすくなります。忙しい時期こそ最低6時間の睡眠をキープしてみてください。また、季節の変わり目（特に秋→冬）に朝の光を意識的に浴びると、冬季の過眠予防に効果的です。"
+  },
+  sloth: {
+    name: "ナマケモノ",
+    emoji: "🦥",
+    type: "省エネ上手・まったりタイプ",
+    ecology: "ナマケモノは飼育下では1日約16時間眠りますが、野生では実は9〜10時間程度。見た目に反して効率的な省エネ戦略の達人です。代謝を極限まで落とすことで、少ない食料でも生き延びる体を作り上げました。実はとても賢い生存戦略なんです。",
+    source: "参考: Rattenborg et al., 2008 (Biology Letters)",
+    tendency: "あなたは「無駄なエネルギーを使わない」天性の才能の持ち主。休日にゆっくり過ごすのは、体が求めるリカバリーでもあります。ただ、休息が長すぎると逆にエンジンがかかりにくくなることも。",
+    advice: "実は、長時間の睡眠がかえって倦怠感につながるという報告もあります（ただし個人差があります）。起きたらまず窓を開けて朝日を浴び、コップ1杯の水を飲む——この2つだけで体内時計のリセットスイッチが入ります。「起きてから動く」ではなく「動くから起きる」の発想がおすすめです。"
+  },
+  bird: {
+    name: "渡り鳥",
+    emoji: "🐦",
+    type: "全力疾走・スプリント型タイプ",
+    ecology: "渡り鳥（例：オオソリハシシギ）は最大約11,680kmを9日間以上ノンストップで飛び続けます。飛行中は数秒間のマイクロスリープで脳を回復させていると考えられています。到着後は通常より長い「回復睡眠（Recovery Sleep）」を取ることが観察されています。",
+    source: "参考: Gill et al., 2009 (Proceedings of the Royal Society B); Rattenborg, 2006 (Naturwissenschaften) ※飛行中睡眠は他種で確認、本種は研究段階",
+    tendency: "あなたは目の前のミッションに全力投球できる集中力の持ち主。「今は頑張りどき」と判断したら、睡眠を後回しにしてでも走り切る力があります。その責任感は大きな強みですが、慢性的な睡眠負債がたまりやすい面も。",
+    advice: "研究では、睡眠負債は「週末の寝溜め」だけでは十分に返済できないとされています。平日に毎日30分ずつ早く寝るのが最も効果的な返済方法です。「あと1本だけ動画を…」を我慢するだけで、1週間で3.5時間の睡眠を取り戻せます。就寝時間にもアラームを設定してみましょう。"
+  },
+  otter: {
+    name: "ラッコ",
+    emoji: "🦦",
+    type: "安心環境・こだわりタイプ",
+    ecology: "ラッコは海の上で眠るとき、海藻（ケルプ）を体に巻きつけて流されないようにします。また、仲間同士で手をつないで寝る「ラフティング」という行動も有名です。安全で安心できる環境を自ら整えてから眠りにつく、環境重視型の動物です。",
+    source: "参考: Riedman & Estes, 1990 (US Fish and Wildlife Service); Monterey Bay Aquarium Research Institute",
+    tendency: "あなたは寝る環境にこだわりが強いタイプ。枕が変わると眠れない、隣に人がいると気になる、旅行先では寝付けない…。「第一夜効果」が強く出やすく、環境の変化に敏感です。逆に、自分のベストな環境が整えば深くぐっすり眠れます。",
+    advice: "環境へのこだわりは弱点ではなく「武器」です。自分だけの最高の睡眠環境を徹底的に整えましょう。遮光カーテン、耳栓（またはホワイトノイズ）、肌触りの良い寝具——この3つへの投資は費用対効果が非常に高いです。出張時は「いつものアイマスク」を持参するだけでも安心感が違います。"
+  }
+};
+
+// ===== 質問データ =====
+const questions = [
+  {
+    text: "理想的な睡眠時間は？",
+    options: [
+      { text: "🏃 4〜5時間あれば十分。寝るより活動したい", scores: { giraffe: 3, bird: 1 } },
+      { text: "⚖️ 6〜7時間がベスト。効率よく寝たい", scores: { dolphin: 2, bear: 1, bird: 1 } },
+      { text: "😴 8〜9時間は欲しい。しっかり寝ないとダメ", scores: { cat: 1, bear: 2, otter: 1 } },
+      { text: "💤 10時間以上。いくらでも寝られる", scores: { koala: 3, sloth: 2 } }
+    ]
+  },
+  {
+    text: "昼寝について、一番近いのは？",
+    options: [
+      { text: "🚫 昼寝はしない。夜にまとめて寝る派", scores: { giraffe: 2, bird: 2 } },
+      { text: "☕ たまに仮眠する。15分くらいが気持ちいい", scores: { bear: 2, dolphin: 1 } },
+      { text: "🛋️ 毎日でも昼寝したい。1時間くらい", scores: { cat: 3, sloth: 1 } },
+      { text: "😪 気づいたら寝落ちしている…", scores: { koala: 2, sloth: 2, cat: 1 } }
+    ]
+  },
+  {
+    text: "寝る環境について、一番気になるのは？",
+    options: [
+      { text: "🌍 どこでも寝られる。場所を選ばない", scores: { giraffe: 2, bird: 1, bear: 1 } },
+      { text: "🌡️ 温度だけ合ってればOK", scores: { cat: 1, bear: 2, sloth: 1 } },
+      { text: "🌙 暗さと静かさは必須。光や音に敏感", scores: { dolphin: 2, otter: 2 } },
+      { text: "🛏️ 枕・寝具・室温…全部こだわりたい", scores: { otter: 3, dolphin: 1 } }
+    ]
+  },
+  {
+    text: "平日と休日の睡眠リズムは？",
+    options: [
+      { text: "⏰ ほぼ同じ。規則正しい生活をしている", scores: { bear: 2, giraffe: 2 } },
+      { text: "📅 休日は1〜2時間多く寝る程度", scores: { cat: 2, otter: 1, dolphin: 1 } },
+      { text: "🔄 休日は昼まで寝る。平日との差が大きい", scores: { koala: 2, sloth: 2, bird: 1 } },
+      { text: "❓ 不規則。日によって全然違う", scores: { bird: 2, dolphin: 2, sloth: 1 } }
+    ]
+  },
+  {
+    text: "朝起きた時、一番よくある状態は？",
+    options: [
+      { text: "☀️ スッキリ！すぐに活動開始できる", scores: { giraffe: 2, bear: 2 } },
+      { text: "🌤️ まあまあ。動き出すまで少しかかる", scores: { cat: 2, otter: 1, dolphin: 1 } },
+      { text: "⏰ アラーム何個も必要…起きるのがつらい", scores: { koala: 2, sloth: 3 } },
+      { text: "😵 寝た気がしない。疲れが残っている", scores: { bird: 2, dolphin: 2, otter: 1 } }
+    ]
+  }
+];
+
+// ===== ステート管理 =====
+let currentQ = 0;
+let scores = {};
+
+function initScores() {
+  scores = {};
+  for (const key of Object.keys(animals)) {
+    scores[key] = 0;
+  }
+}
+
+// ===== 画面遷移 =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById(id);
+  target.classList.add('active');
+  // Re-trigger animation
+  target.style.animation = 'none';
+  target.offsetHeight; // force reflow
+  target.style.animation = '';
+}
+
+// ===== スタート =====
+function startQuiz() {
+  currentQ = 0;
+  initScores();
+  showScreen('screen-question');
+  renderQuestion();
+}
+
+// ===== 質問描画 =====
+function renderQuestion() {
+  const q = questions[currentQ];
+  document.getElementById('q-number').textContent = `QUESTION ${currentQ + 1} / ${questions.length}`;
+  document.getElementById('q-text').textContent = q.text;
+  document.getElementById('progress-fill').style.width = `${((currentQ) / questions.length) * 100}%`;
+
+  const optionsEl = document.getElementById('options');
+  optionsEl.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = opt.text;
+    btn.onclick = () => selectOption(i);
+    optionsEl.appendChild(btn);
+  });
+}
+
+// ===== 選択処理 =====
+function selectOption(idx) {
+  const opt = questions[currentQ].options[idx];
+  // スコア加算
+  for (const [animal, score] of Object.entries(opt.scores)) {
+    scores[animal] = (scores[animal] || 0) + score;
+  }
+
+  currentQ++;
+  if (currentQ < questions.length) {
+    showScreen('screen-question');
+    renderQuestion();
+  } else {
+    document.getElementById('progress-fill').style.width = '100%';
+    setTimeout(() => showResult(), 300);
+  }
+}
+
+// ===== 結果表示 =====
+function showResult() {
+  // 最高スコアの動物を特定
+  let maxScore = -1;
+  let resultKey = 'koala';
+  for (const [key, score] of Object.entries(scores)) {
+    if (score > maxScore) {
+      maxScore = score;
+      resultKey = key;
+    }
+  }
+
+  const animal = animals[resultKey];
+
+  document.getElementById('result-name').textContent = animal.name;
+  document.getElementById('result-type').textContent = animal.type;
+
+  // 画像 or 絵文字
+  const imgContainer = document.getElementById('result-img');
+  const imgPath = `images/${resultKey}.png`;
+  const img = new Image();
+  img.onload = () => {
+    imgContainer.innerHTML = '';
+    const imgEl = document.createElement('img');
+    imgEl.src = imgPath;
+    imgEl.alt = animal.name;
+    imgContainer.appendChild(imgEl);
+  };
+  img.onerror = () => {
+    imgContainer.textContent = animal.emoji;
+  };
+  img.src = imgPath;
+
+  document.getElementById('result-ecology').textContent = animal.ecology;
+  document.getElementById('result-source').textContent = animal.source;
+  document.getElementById('result-tendency').textContent = animal.tendency;
+  document.getElementById('result-advice').textContent = animal.advice;
+
+  showScreen('screen-result');
+}
+
+// ===== シェア機能 =====
+function getShareText() {
+  const name = document.getElementById('result-name').textContent;
+  const type = document.getElementById('result-type').textContent;
+  return `【睡眠タイプ動物診断】\n私の睡眠タイプは「${name}」（${type}）でした！\nあなたも診断してみて👇`;
+}
+
+function shareX() {
+  const text = encodeURIComponent(getShareText());
+  window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
+}
+
+function shareLINE() {
+  const text = encodeURIComponent(getShareText());
+  window.open(`https://social-plugins.line.me/lineit/share?text=${text}`, '_blank');
+}
+
+function copyResult() {
+  const text = getShareText();
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.share-copy');
+    btn.textContent = '✅ コピーしました！';
+    setTimeout(() => { btn.textContent = '📋 コピー'; }, 2000);
+  });
+}
+
+function retry() {
+  showScreen('screen-start');
+}
+
+// ===== 星空の生成 =====
+function createStars() {
+  const container = document.getElementById('stars');
+  const count = 80;
+  for (let i = 0; i < count; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    const size = Math.random() * 2.5 + 0.5;
+    star.style.width = size + 'px';
+    star.style.height = size + 'px';
+    star.style.left = Math.random() * 100 + '%';
+    star.style.top = Math.random() * 100 + '%';
+    star.style.setProperty('--dur', (Math.random() * 3 + 1.5) + 's');
+    star.style.animationDelay = Math.random() * 3 + 's';
+    container.appendChild(star);
+  }
+}
+
+createStars();
+</script>
+</body>
+</html>
