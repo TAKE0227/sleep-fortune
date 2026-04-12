@@ -255,6 +255,9 @@
     object-fit: cover;
     transform: scale(1.05);
   }
+  .result-animal-img img.tight-crop {
+    transform: scale(1.5);
+  }
 
   .result-card {
     background: var(--bg-card);
@@ -659,6 +662,9 @@ function showResult() {
     const imgEl = document.createElement('img');
     imgEl.src = imgPath;
     imgEl.alt = animal.name;
+    if (resultKey === 'bear' || resultKey === 'cat') {
+      imgEl.classList.add('tight-crop');
+    }
     imgContainer.appendChild(imgEl);
   };
   img.onerror = () => {
