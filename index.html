@@ -256,6 +256,9 @@
     transform: scale(1.05);
   }
   .result-animal-img img.tight-crop {
+    transform: scale(1.3);
+  }
+  .result-animal-img img.tight-crop-up {
     transform: scale(1.3) translateY(-8%);
   }
 
@@ -662,8 +665,10 @@ function showResult() {
     const imgEl = document.createElement('img');
     imgEl.src = imgPath;
     imgEl.alt = animal.name;
-    if (resultKey === 'bear' || resultKey === 'cat') {
+    if (resultKey === 'bear') {
       imgEl.classList.add('tight-crop');
+    } else if (resultKey === 'cat') {
+      imgEl.classList.add('tight-crop-up');
     }
     imgContainer.appendChild(imgEl);
   };
