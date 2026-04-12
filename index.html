@@ -242,18 +242,15 @@
     width: 280px;
     height: 280px;
     margin: 0 auto 24px;
-    border-radius: 50%;
-    background: #0c1234;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 6rem;
-    overflow: hidden;
   }
   .result-animal-img img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
   }
 
   .result-card {
@@ -439,7 +436,7 @@ const animals = {
   koala: {
     name: "コアラ",
     emoji: "🐨",
-    imgScale: 1.08,
+
     type: "ロングスリーパータイプ",
     ecology: "コアラは1日18〜22時間も眠る、動物界トップクラスのロングスリーパーです。主食のユーカリは栄養価が低く毒素も含むため、その消化と解毒に膨大なエネルギーを消費します。だからこそ、エネルギーを節約するために長時間の睡眠が必要なのです。",
     source: "参考: National Geographic, Australian Koala Foundation",
@@ -449,7 +446,7 @@ const animals = {
   dolphin: {
     name: "イルカ",
     emoji: "🐬",
-    imgScale: 1.12,
+
     type: "浅い眠り・アラートタイプ",
     ecology: "イルカは「半球睡眠（Unihemispheric Sleep）」という驚きの能力を持ちます。脳の左右を交互に眠らせ、片目を開けたまま泳ぎ続けることができます。捕食者への警戒を緩めず、呼吸のために水面に上がり続ける必要があるための進化的適応です。",
     source: "参考: Mukhametov, 1987; Rattenborg et al., 2000 (Neuroscience & Biobehavioral Reviews)",
@@ -459,7 +456,7 @@ const animals = {
   giraffe: {
     name: "キリン",
     emoji: "🦒",
-    imgScale: 1.1,
+
     type: "ショートスリーパータイプ",
     ecology: "野生のキリンの睡眠時間は1日わずか30分〜2時間ほどとされています。1回の睡眠はたった数分で、立ったまま浅い眠りを取ります。横になって深く眠る時間はごくわずか。草食動物として捕食リスクが高い環境が、この極端な短時間睡眠を生み出しました。",
     source: "参考: Tobler & Schwierin, 1996 (Journal of Sleep Research) ※飼育個体では約4.6時間",
@@ -469,7 +466,7 @@ const animals = {
   cat: {
     name: "ネコ",
     emoji: "🐱",
-    imgScale: 1.15,
+
     type: "多相睡眠・昼寝の達人タイプ",
     ecology: "ネコは1日12〜16時間寝ますが、一度に長く寝るのではなく、短い睡眠を1日に何度も繰り返す「多相睡眠」のスタイルです。これは野生の狩猟本能の名残で、短い覚醒と睡眠を繰り返すことで、いつでもチャンスに反応できるようにしています。",
     source: "参考: Sterman et al., 1965; Lucas & Sterman (Brain Research)",
@@ -479,7 +476,7 @@ const animals = {
   bear: {
     name: "クマ",
     emoji: "🐻",
-    imgScale: 1.1,
+
     type: "メリハリ睡眠・季節型タイプ",
     ecology: "クマは冬になると最大7ヶ月もの冬眠に入ります。この間、体温は4〜8℃ほど下がり、心拍数は1分間に10回以下に。実は冬眠中も浅い覚醒はあり、完全に意識がなくなるわけではありません。夏場はアクティブに活動し、睡眠は短めになります。",
     source: "参考: Tøien et al., 2011 (Science); 北海道大学冬眠研究",
@@ -489,7 +486,7 @@ const animals = {
   sloth: {
     name: "ナマケモノ",
     emoji: "🦥",
-    imgScale: 1.18,
+
     type: "省エネ上手・まったりタイプ",
     ecology: "ナマケモノは飼育下では1日約16時間眠りますが、野生では実は9〜10時間程度。見た目に反して効率的な省エネ戦略の達人です。代謝を極限まで落とすことで、少ない食料でも生き延びる体を作り上げました。実はとても賢い生存戦略なんです。",
     source: "参考: Rattenborg et al., 2008 (Biology Letters)",
@@ -499,7 +496,7 @@ const animals = {
   bird: {
     name: "渡り鳥",
     emoji: "🐦",
-    imgScale: 1.1,
+
     type: "全力疾走・スプリント型タイプ",
     ecology: "渡り鳥（例：オオソリハシシギ）は最大約11,680kmを9日間以上ノンストップで飛び続けます。飛行中は数秒間のマイクロスリープで脳を回復させていると考えられています。到着後は通常より長い「回復睡眠（Recovery Sleep）」を取ることが観察されています。",
     source: "参考: Gill et al., 2009 (Proceedings of the Royal Society B); Rattenborg, 2006 (Naturwissenschaften) ※飛行中睡眠は他種で確認、本種は研究段階",
@@ -509,7 +506,7 @@ const animals = {
   otter: {
     name: "ラッコ",
     emoji: "🦦",
-    imgScale: 1.1,
+
     type: "安心環境・こだわりタイプ",
     ecology: "ラッコは海の上で眠るとき、海藻（ケルプ）を体に巻きつけて流されないようにします。また、仲間同士で手をつないで寝る「ラフティング」という行動も有名です。安全で安心できる環境を自ら整えてから眠りにつく、環境重視型の動物です。",
     source: "参考: Riedman & Estes, 1990 (US Fish and Wildlife Service); Monterey Bay Aquarium Research Institute",
@@ -659,9 +656,6 @@ function showResult() {
     const imgEl = document.createElement('img');
     imgEl.src = imgPath;
     imgEl.alt = animal.name;
-    if (animal.imgScale) {
-      imgEl.style.transform = `scale(${animal.imgScale})`;
-    }
     imgContainer.appendChild(imgEl);
   };
   img.onerror = () => {
