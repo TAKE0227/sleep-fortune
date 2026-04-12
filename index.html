@@ -686,6 +686,8 @@ function showResult() {
 }
 
 // ===== シェア機能 =====
+const SHARE_URL = 'https://take0227.github.io/sleep-fortune/';
+
 function getShareText() {
   const name = document.getElementById('result-name').textContent;
   const type = document.getElementById('result-type').textContent;
@@ -694,21 +696,39 @@ function getShareText() {
 
 function shareX() {
   const text = encodeURIComponent(getShareText());
-  window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
+  const url = encodeURIComponent(SHARE_URL);
+  window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
 }
 
 function shareLINE() {
+  const url = encodeURIComponent(SHARE_URL);
   const text = encodeURIComponent(getShareText());
-  window.open(`https://social-plugins.line.me/lineit/share?text=${text}`, '_blank');
+  window.open(`https://social-plugins.line.me/lineit/share?url=${url}&text=${text}`, '_blank');
 }
 
 function copyResult() {
-  const text = getShareText();
-  navigator.clipboard.writeText(text).then(() => {
-    const btn = document.querySelector('.share-copy');
+  const text = getShareText() + '\n' + SHARE_URL;
+  const btn = document.querySelector('.share-copy');
+  const done = () => {
     btn.textContent = '✅ コピーしました！';
     setTimeout(() => { btn.textContent = '📋 コピー'; }, 2000);
-  });
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+  } else {
+    fallbackCopy(text, done);
+  }
+}
+
+function fallbackCopy(text, done) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); done(); } catch(e) { alert('コピーに失敗しました'); }
+  document.body.removeChild(ta);
 }
 
 function retry() {
