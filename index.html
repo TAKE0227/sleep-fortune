@@ -695,15 +695,13 @@ function getShareText() {
 }
 
 function shareX() {
-  const text = encodeURIComponent(getShareText());
-  const url = encodeURIComponent(SHARE_URL);
-  window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+  const text = encodeURIComponent(getShareText() + '\n' + SHARE_URL);
+  window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
 }
 
 function shareLINE() {
-  const url = encodeURIComponent(SHARE_URL);
-  const text = encodeURIComponent(getShareText());
-  window.open(`https://social-plugins.line.me/lineit/share?url=${url}&text=${text}`, '_blank');
+  const msg = encodeURIComponent(getShareText() + '\n' + SHARE_URL);
+  window.open(`https://line.me/R/msg/text/?${msg}`, '_blank');
 }
 
 function copyResult() {
