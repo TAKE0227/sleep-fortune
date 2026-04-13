@@ -256,10 +256,10 @@
     transform: scale(1.05);
   }
   .result-animal-img img.tight-crop {
-    transform: scale(1.15);
+    transform: scale(1.5);
   }
-  .result-animal-img img.tight-crop-up {
-    transform: scale(1.15) translateY(-6%);
+  .result-animal-img img.mid-crop {
+    transform: scale(1.2);
   }
 
   .result-card {
@@ -668,7 +668,7 @@ function showResult() {
     if (resultKey === 'bear') {
       imgEl.classList.add('tight-crop');
     } else if (resultKey === 'cat') {
-      imgEl.classList.add('tight-crop-up');
+      imgEl.classList.add('mid-crop');
     }
     imgContainer.appendChild(imgEl);
   };
